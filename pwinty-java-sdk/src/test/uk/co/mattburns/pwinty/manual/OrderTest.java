@@ -15,7 +15,6 @@ import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
-import uk.co.mattburns.pwinty.Document;
 import uk.co.mattburns.pwinty.Order;
 import uk.co.mattburns.pwinty.Order.Status;
 import uk.co.mattburns.pwinty.Photo;
@@ -24,7 +23,6 @@ import uk.co.mattburns.pwinty.Photo.Type;
 import uk.co.mattburns.pwinty.Pwinty;
 import uk.co.mattburns.pwinty.Pwinty.Environment;
 import uk.co.mattburns.pwinty.PwintyError;
-import uk.co.mattburns.pwinty.Sticker;
 import uk.co.mattburns.pwinty.SubmissionStatus;
 import uk.co.mattburns.pwinty.SubmissionStatus.GeneralError;
 import uk.co.mattburns.pwinty.gson.TypeDeserializer;
@@ -290,31 +288,8 @@ public class OrderTest {
         }
     }
 
-    @Test
-    public void can_add_and_get_and_delete_document() throws URISyntaxException {
-        Order order = new Order(pwinty);
+ 
 
-        URL resource = OrderTest.class.getResource(TEST_DOCUMENT_LOCAL);
-        File file = new File(resource.toURI());
-
-        Document document = order.addDocument("test.pdf", file);
-        document = pwinty.getDocument(document.getId());
-        assertEquals(1, document.getPages());
-
-        order.deleteDocument(document);
-    }
-
-    @Test
-    public void can_add_and_get_and_delete_sticker() throws URISyntaxException {
-        Order order = new Order(pwinty);
-
-        URL resource = OrderTest.class.getResource(TEST_STICKER_LOCAL);
-        File file = new File(resource.toURI());
-
-        Sticker sticker = order.addSticker("test.jpg", file);
-        sticker = pwinty.getSticker(sticker.getId());
-        order.deleteSticker(sticker);
-    }
 
     @Test
     public void error_with_bad_api_keys() {

@@ -276,107 +276,13 @@ public class Pwinty {
         throwIfBad(response);
     }
 
-    Document addDocumentToOrder(int orderId, String filename, File document) {
 
-        @SuppressWarnings("resource")
-        FormDataMultiPart form = new FormDataMultiPart().field("fileName",
-                filename).field("orderId", "" + orderId);
-
-        form.bodyPart(new FileDataBodyPart("file", document,
-                MediaType.MULTIPART_FORM_DATA_TYPE));
-
-        ClientResponse response = webResource.path("Documents")
-                .type(MediaType.MULTIPART_FORM_DATA_TYPE)
-                .header("X-Pwinty-MerchantId", merchantId)
-                .header("X-Pwinty-REST-API-Key", apiKey)
-                .post(ClientResponse.class, form);
-
-        throwIfBad(response);
-
-        return createReponse(response, Document.class);
-    }
-
-    public Document getDocument(int documentId) {
-        ClientResponse response = webResource.path("Documents")
-                .queryParam("id", "" + documentId)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .header("X-Pwinty-MerchantId", merchantId)
-                .header("X-Pwinty-REST-API-Key", apiKey)
-                .get(ClientResponse.class);
-
-        throwIfBad(response);
-        return createReponse(response, Document.class);
-    }
 
     void deleteDocument(int documentId) {
         Form form = new Form();
         form.add("id", documentId);
 
         ClientResponse response = webResource.path("Documents")
-                .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .header("X-Pwinty-MerchantId", merchantId)
-                .header("X-Pwinty-REST-API-Key", apiKey)
-                .delete(ClientResponse.class, form);
-
-        throwIfBad(response);
-    }
-
-    Sticker addStickerToOrder(int orderId, String filename, File sticker) {
-        @SuppressWarnings("resource")
-        FormDataMultiPart form = new FormDataMultiPart().field("fileName",
-                filename).field("orderId", "" + orderId);
-
-        form.bodyPart(new FileDataBodyPart("file", sticker,
-                MediaType.MULTIPART_FORM_DATA_TYPE));
-
-        ClientResponse response = webResource.path("Stickers")
-                .type(MediaType.MULTIPART_FORM_DATA_TYPE)
-                .header("X-Pwinty-MerchantId", merchantId)
-                .header("X-Pwinty-REST-API-Key", apiKey)
-                .post(ClientResponse.class, form);
-
-        throwIfBad(response);
-
-        return createReponse(response, Sticker.class);
-    }
-
-    Sticker addStickerToOrder(int orderId, String filename, InputStream sticker) {
-        @SuppressWarnings("resource")
-        FormDataMultiPart form = new FormDataMultiPart().field("fileName",
-                filename).field("orderId", "" + orderId);
-
-        form.bodyPart(new StreamDataBodyPart("file", sticker, "sticker.jpg",
-                MediaType.MULTIPART_FORM_DATA_TYPE));
-
-        ClientResponse response = webResource.path("Stickers")
-                .type(MediaType.MULTIPART_FORM_DATA_TYPE)
-                .header("X-Pwinty-MerchantId", merchantId)
-                .header("X-Pwinty-REST-API-Key", apiKey)
-                .post(ClientResponse.class, form);
-
-        throwIfBad(response);
-
-        return createReponse(response, Sticker.class);
-    }
-
-    public Sticker getSticker(int stickerId) {
-        ClientResponse response = webResource.path("Stickers")
-                .queryParam("id", "" + stickerId)
-                .accept(MediaType.APPLICATION_JSON_TYPE)
-                .header("X-Pwinty-MerchantId", merchantId)
-                .header("X-Pwinty-REST-API-Key", apiKey)
-                .get(ClientResponse.class);
-
-        throwIfBad(response);
-        return createReponse(response, Sticker.class);
-    }
-
-    void deleteSticker(int stickerId) {
-        Form form = new Form();
-        form.add("id", stickerId);
-
-        ClientResponse response = webResource.path("Stickers")
                 .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .header("X-Pwinty-MerchantId", merchantId)
@@ -421,7 +327,7 @@ public class Pwinty {
     }
 
     public enum Environment {
-        LIVE("https://api.pwinty.com"), SANDBOX("https://sandbox.pwinty.com");
+        LIVE("https://api.pwinty.com/v2"), SANDBOX("https://sandbox.pwinty.com/v2");
 
         private String url;
 

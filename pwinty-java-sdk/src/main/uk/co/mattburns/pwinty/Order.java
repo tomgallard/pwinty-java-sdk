@@ -13,8 +13,6 @@ public class Order {
     private int id;
     private Status status;
     private List<Photo> photos = new ArrayList<Photo>();
-    private List<Document> documents = new ArrayList<Document>();
-    private List<Sticker> stickers = new ArrayList<Sticker>();
     private String recipientName;
     private String address1;
     private String address2;
@@ -51,13 +49,6 @@ public class Order {
         return photos;
     }
 
-    public List<Document> getDocuments() {
-        return documents;
-    }
-
-    public List<Sticker> getStickers() {
-        return stickers;
-    }
 
     public String getRecipientName() {
         return recipientName;
@@ -125,7 +116,6 @@ public class Order {
     @Override
     public String toString() {
         return "Order [id=" + id + ", status=" + status + ", photos=" + photos
-                + ", documents=" + documents + ", stickers=" + stickers
                 + ", recipientName=" + recipientName + ", address1=" + address1
                 + ", address2=" + address2 + ", addressTownOrCity="
                 + addressTownOrCity + ", stateOrCounty=" + stateOrCounty
@@ -141,8 +131,6 @@ public class Order {
         id = updated.id;
         status = updated.status;
         photos = updated.photos;
-        documents = updated.documents;
-        stickers = updated.stickers;
         recipientName = updated.recipientName;
         address1 = updated.address1;
         address2 = updated.address2;
@@ -188,34 +176,6 @@ public class Order {
         overwriteThisOrderWithGivenOrder(pwinty.getOrder(id));
     }
 
-    public Document addDocument(String filename, File document) {
-        Document addedDocument = pwinty.addDocumentToOrder(id, filename,
-                document);
-        refreshOrder();
-        return addedDocument;
-    }
-
-    public void deleteDocument(Document document) {
-        pwinty.deleteDocument(document.getId());
-        refreshOrder();
-    }
-
-    public Sticker addSticker(String filename, File document) {
-        Sticker addedSticker = pwinty.addStickerToOrder(id, filename, document);
-        refreshOrder();
-        return addedSticker;
-    }
-
-    public Sticker addSticker(String filename, InputStream stream) {
-        Sticker addedSticker = pwinty.addStickerToOrder(id, filename, stream);
-        refreshOrder();
-        return addedSticker;
-    }
-
-    public void deleteSticker(Sticker sticker) {
-        pwinty.deleteSticker(sticker.getId());
-        refreshOrder();
-    }
 
     /**
      * Submit the Order for printing and shipping
