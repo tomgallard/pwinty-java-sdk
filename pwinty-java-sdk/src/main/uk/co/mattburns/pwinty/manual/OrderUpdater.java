@@ -53,7 +53,7 @@ public class OrderUpdater {
         order.setAddressTownOrCity("");
         order.setStateOrCounty("");
         order.setPostalOrZipCode("");
-        order.setCountry("");
+        order.setCountryCode("GB");
     }
 
     public void decodeAddress(int orderIdToUpdate) {
@@ -68,7 +68,7 @@ public class OrderUpdater {
         order.setAddressTownOrCity(decode(order.getAddressTownOrCity()));
         order.setStateOrCounty(decode(order.getStateOrCounty()));
         order.setPostalOrZipCode(decode(order.getPostalOrZipCode()));
-        order.setCountry(decode(order.getCountry()));
+        order.setCountryCode(decode(order.getCountryCode()));
     }
 
     private String decode(String str) {

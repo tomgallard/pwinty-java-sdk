@@ -19,20 +19,25 @@ public class Order {
     private String addressTownOrCity;
     private String stateOrCounty;
     private String postalOrZipCode;
-    private String country;
+    private String countryCode;
+    private QualityLevel qualityLevel;
 
     private Pwinty pwinty;
 
     public enum Status {
         NotYetSubmitted, Submitted, Complete, Cancelled;
     }
-
+    public enum QualityLevel {
+    	Pro,Standard
+    }
     // needed for GSON
     Order() {
     }
 
-    public Order(Pwinty pwinty) {
+    public Order(Pwinty pwinty,String countryCode,QualityLevel qualityLevel) {
         this.pwinty = pwinty;
+        this.countryCode = countryCode;
+        this.qualityLevel = qualityLevel;
         Order order = pwinty.createOrder(this);
         overwriteThisOrderWithGivenOrder(order);
     }
@@ -104,23 +109,30 @@ public class Order {
         overwriteThisOrderWithGivenOrder(pwinty.updateOrder(id, this));
     }
 
-    public String getCountry() {
-        return country;
+    public String getCountryCode() {
+        return countryCode;
     }
 
-    public void setCountry(String country) {
-        this.country = country;
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
         overwriteThisOrderWithGivenOrder(pwinty.updateOrder(id, this));
     }
+    public QualityLevel getQualityLevel() {
+        return qualityLevel;
+    }
 
+    public void setQualityLevel(QualityLevel qualityLevel) {
+        this.qualityLevel = qualityLevel;
+        overwriteThisOrderWithGivenOrder(pwinty.updateOrder(id, this));
+    }
     @Override
     public String toString() {
         return "Order [id=" + id + ", status=" + status + ", photos=" + photos
                 + ", recipientName=" + recipientName + ", address1=" + address1
                 + ", address2=" + address2 + ", addressTownOrCity="
                 + addressTownOrCity + ", stateOrCounty=" + stateOrCounty
-                + ", postalOrZipCode=" + postalOrZipCode + ", country="
-                + country + "]";
+                + ", postalOrZipCode=" + postalOrZipCode + ", countryCode="
+                + countryCode +", qualityLevel=" +qualityLevel +"]";
     }
 
     private void refreshOrder() {
@@ -137,7 +149,8 @@ public class Order {
         addressTownOrCity = updated.addressTownOrCity;
         stateOrCounty = updated.stateOrCounty;
         postalOrZipCode = updated.postalOrZipCode;
-        country = updated.country;
+        qualityLevel= updated.qualityLevel;
+        countryCode = updated.countryCode;
     }
 
     public void cancel() {
@@ -172,7 +185,7 @@ public class Order {
     }
 
     public void deletePhoto(Photo photo) {
-        pwinty.deletePhoto(photo.getId());
+        pwinty.deletePhoto(id,photo.getId());
         overwriteThisOrderWithGivenOrder(pwinty.getOrder(id));
     }
 

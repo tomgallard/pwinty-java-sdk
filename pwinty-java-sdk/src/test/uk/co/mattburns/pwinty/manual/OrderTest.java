@@ -16,6 +16,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import uk.co.mattburns.pwinty.Order;
+import uk.co.mattburns.pwinty.Order.QualityLevel;
 import uk.co.mattburns.pwinty.Order.Status;
 import uk.co.mattburns.pwinty.Photo;
 import uk.co.mattburns.pwinty.Photo.Sizing;
@@ -69,7 +70,7 @@ public class OrderTest {
 
     @Test
     public void can_create_order() {
-        Order order = new Order(pwinty);
+        Order order = new Order(pwinty,"GB",QualityLevel.Pro);
         order.setRecipientName("bloggs");
         assertEquals("bloggs", order.getRecipientName());
         assertTrue(order.getId() > 0);
@@ -77,7 +78,7 @@ public class OrderTest {
 
     @Test
     public void can_create_and_fetch_order_id() {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
         order.setRecipientName("bloggs");
 
         int fetchedOrderId = order.getId();
@@ -103,7 +104,7 @@ public class OrderTest {
         List<Order> fetchedOrders = pwinty.getOrders();
         int initialSize = fetchedOrders.size();
 
-        new Order(pwinty);
+        Order order = new Order(pwinty,"GB",QualityLevel.Pro);
 
         fetchedOrders = pwinty.getOrders();
         assertEquals(initialSize + 1, fetchedOrders.size());
@@ -111,7 +112,7 @@ public class OrderTest {
 
     @Test
     public void can_create_and_update_order() {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
         order.setRecipientName("bloggs");
 
         assertEquals("bloggs", order.getRecipientName());
@@ -127,7 +128,7 @@ public class OrderTest {
 
     @Test
     public void can_create_order_and_get_status() {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
 
         assertEquals(Status.NotYetSubmitted, order.getStatus());
 
@@ -142,11 +143,11 @@ public class OrderTest {
     @Test
     public void can_create_and_add_photo_and_submit_order()
             throws URISyntaxException {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
         order.setAddress1("ad1");
         order.setAddress2("ad2");
         order.setAddressTownOrCity("toc");
-        order.setCountry("uk");
+        order.setCountryCode("GB");
         order.setPostalOrZipCode("zip");
         order.setRecipientName("bloggs");
         order.setStateOrCounty("bristol");
@@ -173,11 +174,11 @@ public class OrderTest {
     @Test
     public void error_is_thrown_if_order_not_in_correct_state()
             throws URISyntaxException {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
         order.setAddress1("ad1");
         order.setAddress2("ad2");
         order.setAddressTownOrCity("toc");
-        order.setCountry("uk");
+        order.setCountryCode("GB");
         order.setPostalOrZipCode("zip");
         order.setRecipientName("bloggs");
         order.setStateOrCounty("bristol");
@@ -199,11 +200,11 @@ public class OrderTest {
 
     @Test
     public void can_create_and_add_photo_by_url() throws MalformedURLException {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
         order.setAddress1("ad1");
         order.setAddress2("ad2");
         order.setAddressTownOrCity("toc");
-        order.setCountry("uk");
+        order.setCountryCode("GB");
         order.setPostalOrZipCode("zip");
         order.setRecipientName("bloggs");
         order.setStateOrCounty("bristol");
@@ -223,14 +224,14 @@ public class OrderTest {
 
     @Test
     public void can_get_photo_details() throws MalformedURLException {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
 
         URL url = new URL(TEST_PHOTO_URL);
         order.addPhoto(url, Type._4x6, 2, Sizing.ShrinkToExactFit);
         SubmissionStatus submissionStatus = order.getSubmissionStatus();
         int photoId = submissionStatus.getPhotos().get(0).getId();
 
-        Photo photo = pwinty.getPhoto(photoId);
+        Photo photo = pwinty.getPhoto(order.getId(), photoId);
         assertEquals(2, photo.getCopies());
         assertEquals(Photo.Sizing.ShrinkToExactFit, photo.getSizing());
 
@@ -238,7 +239,7 @@ public class OrderTest {
 
     @Test
     public void can_delete_photo_from_order() throws MalformedURLException {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
 
         URL url = new URL(TEST_PHOTO_URL);
         order.addPhoto(url, Type._4x6, 1, Sizing.Crop);
@@ -254,7 +255,7 @@ public class OrderTest {
 
     @Test
     public void can_cancel_order() throws URISyntaxException {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
 
         int id = order.getId();
 
@@ -265,11 +266,11 @@ public class OrderTest {
 
     @Test
     public void cannot_cancel_submitted_order() throws URISyntaxException {
-        Order order = new Order(pwinty);
+    	Order order = new Order(pwinty,"GB",QualityLevel.Pro);
         order.setAddress1("ad1");
         order.setAddress2("ad2");
         order.setAddressTownOrCity("toc");
-        order.setCountry("uk");
+        order.setCountryCode("GB");
         order.setPostalOrZipCode("zip");
         order.setRecipientName("bloggs");
         order.setStateOrCounty("bristol");
@@ -295,7 +296,7 @@ public class OrderTest {
     public void error_with_bad_api_keys() {
         Pwinty unauthorizedPwinty = new Pwinty(Environment.SANDBOX, "", "");
         try {
-            new Order(unauthorizedPwinty);
+            new Order(unauthorizedPwinty,"GB",QualityLevel.Pro);
             fail("Should have thrown");
         } catch (PwintyError e) {
             assertEquals(401, e.getCode());

@@ -3,6 +3,7 @@ package uk.co.mattburns.pwinty;
 import java.io.File;
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.List;
@@ -18,6 +19,7 @@ import uk.co.mattburns.pwinty.gson.TypeDeserializer;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.sun.jersey.api.client.Client;
+import com.sun.jersey.api.client.ClientHandlerException;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.api.client.WebResource;
 import com.sun.jersey.api.client.filter.LoggingFilter;
@@ -89,7 +91,21 @@ public class Pwinty {
             Logger logger) {
         this(new LoggingFilter(logger), environment, merchantId, apiKey);
     }
-
+    private String getOrderUpdateUrl(int orderId) {
+    	return String.format("Orders/%s", orderId);
+    }
+    private String getAddPhotoUrl(int orderId) {
+    	return String.format("Orders/%s/Photos", orderId);
+    }
+    private String getSubmissionStatusUrl(int orderId) {
+    	return String.format("Orders/%s/SubmissionStatus", orderId);
+    }
+    private String getPhotoUrl(int orderId, int photoId) {
+    	return String.format("Orders/%s/Photos/%s", orderId,photoId);
+	}
+    private String getOrderStatusUrl(int orderId) {
+    	return String.format("Orders/%s/Status", orderId);
+	}
     private Pwinty(LoggingFilter loggingFilter, Environment environment,
             String merchantId, String apiKey) {
         this.merchantId = merchantId;
@@ -119,7 +135,7 @@ public class Pwinty {
     }
 
     public Order getOrder(int orderId) {
-        ClientResponse response = webResource.path("Orders")
+        ClientResponse response = webResource.path(getOrderUpdateUrl(orderId))
                 .queryParam("id", "" + orderId)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .header("X-Pwinty-MerchantId", merchantId)
@@ -142,11 +158,11 @@ public class Pwinty {
 
         return createReponse(response, Order.class);
     }
-
+    
     Order updateOrder(int orderId, Order newOrder) {
         Form form = createOrderForm(newOrder);
-        form.add("id", orderId);
-        ClientResponse response = webResource.path("Orders")
+        String url  = getOrderUpdateUrl(orderId);
+        ClientResponse response = webResource.path(url)
                 .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .header("X-Pwinty-MerchantId", merchantId)
@@ -163,7 +179,7 @@ public class Pwinty {
     }
 
     SubmissionStatus getSubmissionStatus(int orderId) {
-        ClientResponse response = webResource.path("Orders/SubmissionStatus")
+        ClientResponse response = webResource.path(getSubmissionStatusUrl(orderId))
                 .queryParam("id", "" + orderId)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .header("X-Pwinty-MerchantId", merchantId)
@@ -208,8 +224,8 @@ public class Pwinty {
         } else {
             form = form.field("url", photoUrl.toExternalForm());
         }
-
-        ClientResponse response = webResource.path("Photos")
+        String uploadPath = getAddPhotoUrl(orderId);
+        ClientResponse response = webResource.path(uploadPath)
                 .type(MediaType.MULTIPART_FORM_DATA_TYPE)
                 .header("X-Pwinty-MerchantId", merchantId)
                 .header("X-Pwinty-REST-API-Key", apiKey)
@@ -220,9 +236,8 @@ public class Pwinty {
         return createReponse(response, Photo.class);
     }
 
-    public Photo getPhoto(int photoId) {
-        ClientResponse response = webResource.path("Photos")
-                .queryParam("id", "" + photoId)
+    public Photo getPhoto(int orderId,int photoId) {
+        ClientResponse response = webResource.path(getPhotoUrl(orderId,photoId))
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .header("X-Pwinty-MerchantId", merchantId)
                 .header("X-Pwinty-REST-API-Key", apiKey)
@@ -231,17 +246,16 @@ public class Pwinty {
         return createReponse(response, Photo.class);
     }
 
-    void deletePhoto(int photoId) {
-        Form form = new Form();
-        form.add("id", photoId);
 
-        ClientResponse response = webResource.path("Photos")
+
+	void deletePhoto(int orderId,int photoId) {
+ 
+        ClientResponse response =  webResource.path(getPhotoUrl(orderId, photoId))
                 .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .header("X-Pwinty-MerchantId", merchantId)
                 .header("X-Pwinty-REST-API-Key", apiKey)
-                .delete(ClientResponse.class, form);
-
+                .delete(ClientResponse.class);
         throwIfBad(response);
     }
 
@@ -266,7 +280,7 @@ public class Pwinty {
         form.add("id", orderId);
         form.add("status", status);
 
-        ClientResponse response = webResource.path("Orders/Status")
+        ClientResponse response = webResource.path(getOrderStatusUrl(orderId))
                 .type(MediaType.APPLICATION_FORM_URLENCODED_TYPE)
                 .accept(MediaType.APPLICATION_JSON_TYPE)
                 .header("X-Pwinty-MerchantId", merchantId)
@@ -300,7 +314,8 @@ public class Pwinty {
         form.add("addressTownOrCity", newOrder.getAddressTownOrCity());
         form.add("stateOrCounty", newOrder.getStateOrCounty());
         form.add("postalOrZipCode", newOrder.getPostalOrZipCode());
-        form.add("country", newOrder.getCountry());
+        form.add("countryCode", newOrder.getCountryCode());
+        form.add("qualityLevel", newOrder.getQualityLevel());
         return form;
     }
 
@@ -317,8 +332,9 @@ public class Pwinty {
     }
 
     private PwintyError toError(ClientResponse response) {
+    	String jsonResponse = response.getEntity(String.class);
         PwintyError error = createGson().fromJson(
-                response.getEntity(String.class), PwintyError.class);
+                jsonResponse, PwintyError.class);
         if (error == null) {
             error = new PwintyError();
         }
@@ -327,7 +343,7 @@ public class Pwinty {
     }
 
     public enum Environment {
-        LIVE("https://api.pwinty.com/v2"), SANDBOX("https://sandbox.pwinty.com/v2");
+        LIVE("https://api.pwinty.com/v2"), SANDBOX("http://local.pwinty.com/v2");
 
         private String url;
 
