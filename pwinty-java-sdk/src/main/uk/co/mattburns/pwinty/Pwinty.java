@@ -421,7 +421,7 @@ public class Pwinty {
     }
 
     public enum Environment {
-        LIVE("https://api.pwinty.com"), SANDBOX("https://sandbox.pwinty.com");
+        LIVE("https://api.pwinty.com"), SANDBOX("http://local.pwinty.com");
 
         private String url;
 
